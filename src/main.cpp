@@ -1,11 +1,19 @@
 #include <Arduino.h>
 #include "WiFi.h"
+#include "HTTPClient.h"
+#include <ArduinoJson.h>
 
 // DEFINES
-#define WIFI_NAME "Naplet"
-#define WIFI_PASS "Napletszatana89"
+// #define WIFI_NAME "Naplet"
+// #define WIFI_PASS "Napletszatana89"
+#define WIFI_NAME "PrzekleteObliczeBelzebuba"
+#define WIFI_PASS "xx"
 #define WIFI_DEVICE_NAME "ESP32 Divajs"
 #define WIFI_TIMEOUT_MS 20000
+
+#define POST_INTERVAL 60000
+
+time_t prevTime;
 
 int i = 1;
 
@@ -31,6 +39,23 @@ void connectToWifi(){
   }
 }
 
+void sendPost(int someint){
+  HTTPClient http;
+  http.begin("https://modbus-back.herokuapp.com/data");
+  http.addHeader("Content-Type", "application/json");
+
+  StaticJsonDocument<200> doc;
+  doc["modbusID"] = "modbus1";
+  doc["batteryVoltage"] = someint;
+  doc["solarVoltage"] = 22;
+    
+  String requestBody;
+  serializeJson(doc, requestBody);
+    
+  int httpResponseCode = http.POST(requestBody);
+ 
+  http.end();
+}
 
 void setup() {
   Serial.begin(115200);
@@ -38,12 +63,17 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  
-  while(true){
-    delay(500);
+
+  if(millis() - prevTime >= POST_INTERVAL )
+  {
     i++;
     Serial.println(i);
+
+    sendPost(i);
+
+    prevTime = millis();
   }
-  
+  else{
+    // TODO: Getting data from modbus sensors?
+  }
 }
