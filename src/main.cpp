@@ -6,6 +6,11 @@
 #include <Adafruit_BMP280.h>
 #include <Wire.h>
 
+#include <ModbusMaster.h>
+// instantiate ModbusMaster object
+ModbusMaster node;
+
+
 Adafruit_BMP280 bme;
 
 // DEFINES
@@ -99,7 +104,9 @@ void checkManualPostPin(){
 
 void setup()
 {
-  Serial.begin(115200);
+//  Serial.begin(115200);
+  Serial.begin(9600);
+
   wifiManager.autoConnect("ESP32-MODBUS");
   pinMode(RESET_WIFI_PIN, INPUT_PULLUP);
   pinMode(MANUAL_POST_PIN, INPUT_PULLUP);
@@ -110,6 +117,10 @@ void setup()
   Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
                     "try a different address!"));
   }
+
+  // communicate with Modbus slave ID 2 over Serial (port 0)
+  node.begin(1, Serial);
+
 }
 
 void loop()
@@ -151,5 +162,35 @@ void loop()
   {
     checkManualPostPin();
     checkResetWifiButton();
+  }
+
+  //MODBUS....
+  static uint32_t i;
+  uint8_t j, result;
+  uint16_t data[6];
+  
+  i++;
+  
+  // set word 0 of TX buffer to least-significant word of counter (bits 15..0)
+  node.setTransmitBuffer(0, lowWord(i));
+  
+  // set word 1 of TX buffer to most-significant word of counter (bits 31..16)
+  node.setTransmitBuffer(1, highWord(i));
+  
+  // slave: write TX buffer to (2) 16-bit registers starting at register 0
+  result = node.writeMultipleRegisters(0, 2);
+  
+  // slave: read (6) 16-bit registers starting at register 2 to RX buffer
+  result = node.readHoldingRegisters(2, 6);
+  
+  // do something with data if read is successful
+  if (result == node.ku8MBSuccess)
+  {
+    for (j = 0; j < 6; j++)
+    {
+      data[j] = node.getResponseBuffer(j);
+      Serial.println(data[j]);
+    }
+    
   }
 }
