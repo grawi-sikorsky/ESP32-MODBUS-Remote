@@ -165,17 +165,17 @@ void loop()
   }
 
   //MODBUS....
-  static uint32_t i;
+  static uint32_t k;
   uint8_t j, result;
   uint16_t data[6];
   
-  i++;
+  k++;
   
   // set word 0 of TX buffer to least-significant word of counter (bits 15..0)
-  node.setTransmitBuffer(0, lowWord(i));
+  node.setTransmitBuffer(0, lowWord(k));
   
   // set word 1 of TX buffer to most-significant word of counter (bits 31..16)
-  node.setTransmitBuffer(1, highWord(i));
+  node.setTransmitBuffer(1, highWord(k));
   
   // slave: write TX buffer to (2) 16-bit registers starting at register 0
   result = node.writeMultipleRegisters(0, 2);
