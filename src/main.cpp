@@ -67,15 +67,6 @@ void getSetup(){
 
   int httpResponseCode = http.GET();
 
-  // String payload = "{}";
-  // payload = http.getString();
-
-  // Serial.print("http response: ");
-  // Serial.println(httpResponseCode);
-
-  // Serial.print("http payload: ");
-  // Serial.println(payload);
-
   DynamicJsonDocument doc(1024);
   deserializeJson(doc, http.getString());
 
@@ -84,14 +75,10 @@ void getSetup(){
   mbSetup.postUpdateInterval    = (const char*)doc["postUpdateInterval"];
   mbSetup.setupUpdateInterval   = (const char*)doc["setupUpdateInterval"];
 
-  Serial.println(mbSetup.modbusID);
-  Serial.println(mbSetup.readingUpdateInterval);
-  Serial.println(mbSetup.postUpdateInterval);
-  Serial.println(mbSetup.setupUpdateInterval);
-
   http.end();
 
-  Serial.println("GET done.");
+  Serial.print("GET done with HTTP response: ");
+  Serial.println(httpResponseCode);
 }
 
 void initRemoteSetup(){
