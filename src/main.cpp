@@ -62,23 +62,40 @@ void sendPost(ModbusData data)
 
 void getSetup(){
   HTTPClient http;
-  http.begin("https://modbus-back.herokuapp.com/setup");
+  http.begin("https://modbus-back.herokuapp.com/setup/modbus1");
   http.addHeader("Content-Type", "application/json");
 
   int httpResponseCode = http.GET();
 
-  String payload = "{}";
-  payload = http.getString();
+  // String payload = "{}";
+  // payload = http.getString();
 
-  Serial.print("http response: ");
-  Serial.println(httpResponseCode);
+  // Serial.print("http response: ");
+  // Serial.println(httpResponseCode);
 
-  Serial.print("http payload: ");
-  Serial.println(payload);
+  // Serial.print("http payload: ");
+  // Serial.println(payload);
+
+  DynamicJsonDocument doc(1024);
+  deserializeJson(doc, http.getString());
+
+  mbSetup.modbusID              = (const char*)doc["modbusID"];
+  mbSetup.readingUpdateInterval = (const char*)doc["readingUpdateInterval"];
+  mbSetup.postUpdateInterval    = (const char*)doc["postUpdateInterval"];
+  mbSetup.setupUpdateInterval   = (const char*)doc["setupUpdateInterval"];
+
+  Serial.println(mbSetup.modbusID);
+  Serial.println(mbSetup.readingUpdateInterval);
+  Serial.println(mbSetup.postUpdateInterval);
+  Serial.println(mbSetup.setupUpdateInterval);
 
   http.end();
 
   Serial.println("GET done.");
+}
+
+void initRemoteSetup(){
+
 }
 
 void checkResetWifiButton(){
@@ -97,7 +114,7 @@ void checkManualPostPin(){
 void setup()
 {
 //  Serial.begin(115200);
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial2.begin(9600);
 
   wifiManager.autoConnect("ESP32-MODBUS");
@@ -118,12 +135,12 @@ void setup()
 
 void loop()
 {
-  if (millis() - postPrevTime >= POST_INTERVAL)
+  if (millis() - postPrevTime >= mbSetup.postUpdateInterval.toInt())
   {
     sendPost(mbData);
     postPrevTime = millis();
   }
-  else if (millis() - bmePrevTime >= READ_INTERVAL)
+  else if (millis() - bmePrevTime >= mbSetup.readingUpdateInterval.toInt())
   {
     mbData.modbusID               = "modbus1";
     mbData.pvVoltage              = "32";
@@ -147,9 +164,10 @@ void loop()
 
     bmePrevTime = millis();
   }
-  else if(millis() - setupPrevTime >= SETUP_CHECK_INTERVAL)
+  else if(millis() - setupPrevTime >= mbSetup.setupUpdateInterval.toInt())
   {
     getSetup();
+    setupPrevTime = millis();
   }
   else
   {
@@ -158,32 +176,32 @@ void loop()
   }
 
   //MODBUS....
-  static uint32_t k;
-  uint8_t j, result;
-  uint16_t data[6];
+  // static uint32_t k;
+  // uint8_t j, result;
+  // uint16_t data[6];
   
-  k++;
+  // k++;
   
-  // set word 0 of TX buffer to least-significant word of counter (bits 15..0)
-  node.setTransmitBuffer(0, lowWord(k));
+  // // set word 0 of TX buffer to least-significant word of counter (bits 15..0)
+  // node.setTransmitBuffer(0, lowWord(k));
   
-  // set word 1 of TX buffer to most-significant word of counter (bits 31..16)
-  node.setTransmitBuffer(1, highWord(k));
+  // // set word 1 of TX buffer to most-significant word of counter (bits 31..16)
+  // node.setTransmitBuffer(1, highWord(k));
   
-  // slave: write TX buffer to (2) 16-bit registers starting at register 0
-  result = node.writeMultipleRegisters(0, 2);
+  // // slave: write TX buffer to (2) 16-bit registers starting at register 0
+  // result = node.writeMultipleRegisters(0, 2);
   
-  // slave: read (6) 16-bit registers starting at register 2 to RX buffer
-  result = node.readHoldingRegisters(2, 6);
+  // // slave: read (6) 16-bit registers starting at register 2 to RX buffer
+  // result = node.readHoldingRegisters(2, 6);
   
-  // do something with data if read is successful
-  if (result == node.ku8MBSuccess)
-  {
-    for (j = 0; j < 6; j++)
-    {
-      data[j] = node.getResponseBuffer(j);
-      Serial.println(data[j]);
-    }
+  // // do something with data if read is successful
+  // if (result == node.ku8MBSuccess)
+  // {
+  //   for (j = 0; j < 6; j++)
+  //   {
+  //     data[j] = node.getResponseBuffer(j);
+  //     Serial.println(data[j]);
+  //   }
     
-  }
+  // }
 }
