@@ -5,13 +5,10 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
 #include <Wire.h>
-
 #include <ModbusMaster.h>
-// instantiate ModbusMaster object
-ModbusMaster node;
 
-
-Adafruit_BMP280 bme;
+// MOJE INCLUDES
+#include "modbusData.h"
 
 // DEFINES
 #define RESET_WIFI_PIN 19
@@ -23,36 +20,18 @@ Adafruit_BMP280 bme;
 #define I2C_SDA 21
 #define I2C_SCL 22
 
+ModbusMaster node;
+Adafruit_BMP280 bme;
 WiFiManager wifiManager;
+modbusData mbData;
 
 time_t postPrevTime;
 time_t bmePrevTime;
 
 int i = 1;
 
-class modbusData{
-  public: String modbusID;
-  public: String pvVoltage;
-  public: String pvCurrent;
-  public: String pvPower;
-  public: String pvTotalChargingToday;
-  public: String pvTotalCharging;
-  public: String batVoltage;
-  public: String batCurrent;
-  public: String mpptTemperature;
-  public: String batStatus;
-  public: String batChargingStatus;
-  public: String batDischargingStatus;
-  public: String loadVoltage;
-  public: String loadCurrent;
-  public: String loadPower;
-  public: String energyConsumedToday;
-  public: String energyConsumedTotal;
-  public: float espTemperature;
-  public: float espPressure;
-};
 
-modbusData mbData;
+
 
 void sendPost(modbusData data)
 {
@@ -87,6 +66,8 @@ void sendPost(modbusData data)
   int httpResponseCode = http.POST(requestBody);
 
   http.end();
+
+  Serial.println("POST sent.");
 }
 
 void checkResetWifiButton(){
@@ -98,7 +79,7 @@ void checkResetWifiButton(){
 void checkManualPostPin(){
   if(digitalRead(MANUAL_POST_PIN) == LOW){
     sendPost(mbData);
-    Serial.println("manual POST sent..");
+    Serial.println("Manual POST sent..");
   }
 }
 
@@ -115,8 +96,8 @@ void setup()
   Wire.begin();
 
   if (!bme.begin(0x76)) {
-  Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
-                    "try a different address!"));
+    Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
+                      "try a different address!"));
   }
 
   // communicate with Modbus slave ID 2 over Serial (port 0)
@@ -128,11 +109,7 @@ void loop()
 {
   if (millis() - postPrevTime >= POST_INTERVAL)
   {
-    i++;
-    Serial.println(i);
-
     sendPost(mbData);
-
     postPrevTime = millis();
   }
   else if (millis() - bmePrevTime >= BME_INTERVAL)
