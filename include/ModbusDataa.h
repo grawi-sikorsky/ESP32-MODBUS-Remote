@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-class modbusData{
+class ModbusData{
   public: String modbusID;
   public: String pvVoltage;
   public: String pvCurrent;

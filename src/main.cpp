@@ -9,6 +9,7 @@
 
 // MOJE INCLUDES
 #include "modbusData.h"
+#include "setupData.h"
 
 // DEFINES
 #define RESET_WIFI_PIN 19
@@ -24,6 +25,7 @@ ModbusMaster node;
 Adafruit_BMP280 bme;
 WiFiManager wifiManager;
 modbusData mbData;
+setupData
 
 time_t postPrevTime;
 time_t bmePrevTime;
