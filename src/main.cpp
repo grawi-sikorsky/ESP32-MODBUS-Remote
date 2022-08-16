@@ -8,34 +8,22 @@
 #include <ModbusMaster.h>
 
 // MOJE INCLUDES
-#include "modbusData.h"
-#include "setupData.h"
-
-// DEFINES
-#define RESET_WIFI_PIN 19
-#define MANUAL_POST_PIN 13
-#define MANUAL_PIN 12
-
-#define POST_INTERVAL 120000
-#define BME_INTERVAL 5000
-#define I2C_SDA 21
-#define I2C_SCL 22
+#include "ModbusData.h"
+#include "SetupData.h"
 
 ModbusMaster node;
 Adafruit_BMP280 bme;
 WiFiManager wifiManager;
-modbusData mbData;
-setupData
+ModbusData mbData;
+SetupData mbSetup;
 
-time_t postPrevTime;
+time_t postPrevTime, setupPrevTime;
 time_t bmePrevTime;
 
 int i = 1;
 
 
-
-
-void sendPost(modbusData data)
+void sendPost(ModbusData data)
 {
   HTTPClient http;
   http.begin("https://modbus-back.herokuapp.com/data");
@@ -70,6 +58,27 @@ void sendPost(modbusData data)
   http.end();
 
   Serial.println("POST sent.");
+}
+
+void getSetup(){
+  HTTPClient http;
+  http.begin("https://modbus-back.herokuapp.com/setup");
+  http.addHeader("Content-Type", "application/json");
+
+  int httpResponseCode = http.GET();
+
+  String payload = "{}";
+  payload = http.getString();
+
+  Serial.print("http response: ");
+  Serial.println(httpResponseCode);
+
+  Serial.print("http payload: ");
+  Serial.println(payload);
+
+  http.end();
+
+  Serial.println("GET done.");
 }
 
 void checkResetWifiButton(){
@@ -114,7 +123,7 @@ void loop()
     sendPost(mbData);
     postPrevTime = millis();
   }
-  else if (millis() - bmePrevTime >= BME_INTERVAL)
+  else if (millis() - bmePrevTime >= READ_INTERVAL)
   {
     mbData.modbusID               = "modbus1";
     mbData.pvVoltage              = "32";
@@ -137,6 +146,10 @@ void loop()
     mbData.espPressure            = bme.readPressure();
 
     bmePrevTime = millis();
+  }
+  else if(millis() - setupPrevTime >= SETUP_CHECK_INTERVAL)
+  {
+    getSetup();
   }
   else
   {

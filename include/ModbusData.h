@@ -1,25 +1,25 @@
 #include <Arduino.h>
+#include "Configuration.h"
 
 class ModbusData{
-  public: String modbusID;
-  public: String pvVoltage;
-  public: String pvCurrent;
-  public: String pvPower;
-  public: String pvTotalChargingToday;
-  public: String pvTotalCharging;
-  public: String batVoltage;
-  public: String batCurrent;
-  public: String mpptTemperature;
-  public: String batStatus;
-  public: String batChargingStatus;
-  public: String batDischargingStatus;
-  public: String loadVoltage;
-  public: String loadCurrent;
-  public: String loadPower;
-  public: String energyConsumedToday;
-  public: String energyConsumedTotal;
-  public: float espTemperature;
-  public: float espPressure;
-
-    
+  public: 
+    String modbusID;
+    String pvVoltage;
+    String pvCurrent;
+    String pvPower;
+    String pvTotalChargingToday;
+    String pvTotalCharging;
+    String batVoltage;
+    String batCurrent;
+    String mpptTemperature;
+    String batStatus;
+    String batChargingStatus;
+    String batDischargingStatus;
+    String loadVoltage;
+    String loadCurrent;
+    String loadPower;
+    String energyConsumedToday;
+    String energyConsumedTotal;
+    float espTemperature;
+    float espPressure;
 };
