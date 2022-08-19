@@ -26,11 +26,11 @@ class ModbusReader{
 
     private:
         ModbusMaster node;
-        ModbusData mbData;
         uint8_t currentRegistryNumber = 0;
 
     
     public:
+        ModbusData mbData;
         ModbusData getData(){ return mbData; }
 
         void initModbus();

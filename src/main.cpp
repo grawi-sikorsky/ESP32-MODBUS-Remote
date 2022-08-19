@@ -135,7 +135,7 @@ void loop()
 {
   if (millis() - postPrevTime >= mbSetup.postUpdateInterval.toInt())
   {
-    sendPost(mbReader.getData());
+    sendPost(mbReader.mbData);
     postPrevTime = millis();
   }
   else if (millis() - bmePrevTime >= mbSetup.readingUpdateInterval.toInt())
