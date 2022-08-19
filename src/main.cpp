@@ -196,5 +196,6 @@ void loop()
   else
   {
     Serial.println("lipa");
+    delay(1000);
   }
 }
