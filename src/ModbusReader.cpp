@@ -14,7 +14,10 @@ void ModbusReader::readModbusDataFromDevice()
     AddressRegistry_311A();
     AddressRegistry_331B();
     AddressRegistry_3200();
+    AddressRegistry_331A();
     AddressDeviceTemp();
+    AddressGeneratedTotals();
+    AddressConsumedTotals();
 }
 
 void ModbusReader::AddressRegistry_3100()
@@ -26,7 +29,7 @@ void ModbusReader::AddressRegistry_3100()
         mbData.pvCurrent = node.getResponseBuffer(0x01) / 100.0f;
         mbData.pvPower = (node.getResponseBuffer(0x02) | node.getResponseBuffer(0x03) << 16) / 100.0f;
         mbData.batVoltage = node.getResponseBuffer(0x04) / 100.0f;
-        mbData.batChargingCurrent = node.getResponseBuffer(0x05) / 100.0f; // todo: BAT CHARGING CURRENT IN MODEL!!!!
+        mbData.batChargingCurrent = node.getResponseBuffer(0x05) / 100.0f;
 
         #ifdef DEBUG
             Serial.print("PV Voltage: ");
@@ -107,6 +110,7 @@ void ModbusReader::AddressRegistry_331B()
     }
 }
 
+// To nie tak...
 void ModbusReader::AddressRegistry_3200()
 {
     if (node.readInputRegisters(0x3200, 3) == node.ku8MBSuccess)
@@ -134,6 +138,60 @@ void ModbusReader::AddressDeviceTemp(){
         #ifdef DEBUG
             Serial.print("MPPT device temp: ");
             Serial.println(mbData.mpptTemperature);
+        #endif
+    }
+}
+
+void ModbusReader::AddressGeneratedTotals(){
+    if (node.readInputRegisters(0x330C, 8) == node.ku8MBSuccess)
+    {
+        mbData.genTotalToday = ( node.getResponseBuffer(0x00) | node.getResponseBuffer(0x01) << 16 ) / 100.0f;
+        mbData.genTotalMonth = ( node.getResponseBuffer(0x02) | node.getResponseBuffer(0x03) << 16 ) / 100.0f;
+        mbData.genTotalYear = ( node.getResponseBuffer(0x04) | node.getResponseBuffer(0x05) << 16 ) / 100.0f;
+        mbData.genTotalAll = ( node.getResponseBuffer(0x06) | node.getResponseBuffer(0x07) << 16 ) / 100.0f;
+
+        #ifdef DEBUG
+            Serial.print("Total Generated Today: ");
+            Serial.println(mbData.genTotalToday);
+            Serial.print("Total Generated Month: ");
+            Serial.println(mbData.genTotalMonth);
+            Serial.print("Total Generated Year: ");
+            Serial.println(mbData.genTotalYear);
+            Serial.print("Total Generated Alltime: ");
+            Serial.println(mbData.genTotalAll);
+        #endif
+    }
+}
+
+void ModbusReader::AddressConsumedTotals(){
+    if (node.readInputRegisters(0x3304, 8) == node.ku8MBSuccess)
+    {
+        mbData.consTotalToday = ( node.getResponseBuffer(0x00) | node.getResponseBuffer(0x01) << 16 ) / 100.0f;
+        mbData.consTotalMonth = ( node.getResponseBuffer(0x02) | node.getResponseBuffer(0x03) << 16 ) / 100.0f;
+        mbData.consTotalYear = ( node.getResponseBuffer(0x04) | node.getResponseBuffer(0x05) << 16 ) / 100.0f;
+        mbData.consTotalAll = ( node.getResponseBuffer(0x06) | node.getResponseBuffer(0x07) << 16 ) / 100.0f;
+
+        #ifdef DEBUG
+            Serial.print("Total Consumed Today: ");
+            Serial.println(mbData.consTotalToday);
+            Serial.print("Total Consumed Month: ");
+            Serial.println(mbData.consTotalMonth);
+            Serial.print("Total Consumed Year: ");
+            Serial.println(mbData.consTotalYear);
+            Serial.print("Total Consumed Alltime: ");
+            Serial.println(mbData.consTotalAll);
+        #endif
+    }
+}
+
+void ModbusReader::AddressRegistry_331A(){
+    if (node.readInputRegisters(0x331A, 1) == node.ku8MBSuccess)
+    {
+        mbData.test = node.getResponseBuffer(0x00) / 100.0f;
+
+        #ifdef DEBUG
+            Serial.print("331A Batery voltage?: ");
+            Serial.println(mbData.test);
         #endif
     }
 }

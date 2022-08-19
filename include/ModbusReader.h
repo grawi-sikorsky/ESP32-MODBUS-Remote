@@ -39,5 +39,8 @@ class ModbusReader{
         void AddressRegistry_311A();
         void AddressRegistry_331B();
         void AddressRegistry_3200();
+        void AddressRegistry_331A();
         void AddressDeviceTemp();
+        void AddressGeneratedTotals();
+        void AddressConsumedTotals();
 };

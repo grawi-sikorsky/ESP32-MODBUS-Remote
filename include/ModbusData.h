@@ -25,8 +25,18 @@ class ModbusData{
     String loadCurrent;
     String loadPower;
     String loadStatus;
-    String energyConsumedToday;
-    String energyConsumedTotal;
+    String energyConsumedToday; //
+    String energyConsumedTotal; //
+    String genTotalToday;
+    String genTotalMonth;
+    String genTotalYear;
+    String genTotalAll;
+    String consTotalToday;
+    String consTotalMonth;
+    String consTotalYear;
+    String consTotalAll;
+
+    String test;
     float espTemperature;
     float espPressure;
 };
