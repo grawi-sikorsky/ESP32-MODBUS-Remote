@@ -8,12 +8,15 @@
 #include <ModbusMaster.h>
 
 // MOJE INCLUDES
-#include "ModbusData.h"
+// #include "ModbusData.h"
+#include "ModbusReader.h"
 #include "SetupData.h"
+
 
 ModbusMaster node;
 Adafruit_BMP280 bme;
 WiFiManager wifiManager;
+ModbusReader mbReader;
 ModbusData mbData;
 SetupData mbSetup;
 
@@ -37,7 +40,7 @@ void sendPost(ModbusData data)
   doc["pvTotalChargingToday"]   = data.pvTotalChargingToday;
   doc["pvTotalCharging"]        = data.pvTotalCharging;
   doc["batVoltage"]             = data.batVoltage;
-  doc["batCurrent"]             = data.batCurrent;
+  doc["batCurrent"]             = data.batChargingCurrent;
   doc["mpptTemperature"]        = data.mpptTemperature;
   doc["batStatus"]              = data.batStatus;
   doc["batChargingStatus"]      = data.batChargingStatus;
@@ -100,9 +103,7 @@ void checkManualPostPin(){
 
 void setup()
 {
-//  Serial.begin(115200);
   Serial.begin(115200);
-  Serial2.begin(9600);
 
   wifiManager.autoConnect("ESP32-MODBUS");
   pinMode(RESET_WIFI_PIN, INPUT_PULLUP);
@@ -115,9 +116,7 @@ void setup()
                       "try a different address!"));
   }
 
-  // communicate with Modbus slave ID 2 over Serial (port 0)
-  node.begin(1, Serial2);
-
+  mbReader.initModbus();
 }
 
 void loop()
@@ -136,7 +135,7 @@ void loop()
     mbData.pvTotalChargingToday   = "150";
     mbData.pvTotalCharging        = "12000";
     mbData.batVoltage             = "25";
-    mbData.batCurrent             = "0.1";
+    mbData.batOverallCurrent      = "0.1";
     mbData.mpptTemperature        = "25";
     mbData.batStatus              = "Normal";
     mbData.batChargingStatus      = "No charging";
@@ -149,7 +148,10 @@ void loop()
     mbData.espTemperature         = bme.readTemperature();
     mbData.espPressure            = bme.readPressure();
 
+    mbReader.readModbusDataFromDevice();
+
     bmePrevTime = millis();
+
   }
   else if(millis() - setupPrevTime >= mbSetup.setupUpdateInterval.toInt())
   {
@@ -161,34 +163,4 @@ void loop()
     checkManualPostPin();
     checkResetWifiButton();
   }
-
-  //MODBUS....
-  // static uint32_t k;
-  // uint8_t j, result;
-  // uint16_t data[6];
-  
-  // k++;
-  
-  // // set word 0 of TX buffer to least-significant word of counter (bits 15..0)
-  // node.setTransmitBuffer(0, lowWord(k));
-  
-  // // set word 1 of TX buffer to most-significant word of counter (bits 31..16)
-  // node.setTransmitBuffer(1, highWord(k));
-  
-  // // slave: write TX buffer to (2) 16-bit registers starting at register 0
-  // result = node.writeMultipleRegisters(0, 2);
-  
-  // // slave: read (6) 16-bit registers starting at register 2 to RX buffer
-  // result = node.readHoldingRegisters(2, 6);
-  
-  // // do something with data if read is successful
-  // if (result == node.ku8MBSuccess)
-  // {
-  //   for (j = 0; j < 6; j++)
-  //   {
-  //     data[j] = node.getResponseBuffer(j);
-  //     Serial.println(data[j]);
-  //   }
-    
-  // }
 }

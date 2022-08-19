@@ -8,3 +8,5 @@
 #define SETUP_CHECK_INTERVAL    1000
 #define I2C_SDA 21
 #define I2C_SCL 22
+
+#define DEBUG
