@@ -2,8 +2,8 @@
 #include "WiFiManager.h"
 #include "HTTPClient.h"
 #include <ArduinoJson.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BMP280.h>
+// #include <Adafruit_Sensor.h>
+// #include <Adafruit_BMP280.h>
 #include <Wire.h>
 #include <ModbusMaster.h>
 
@@ -14,7 +14,7 @@
 
 
 ModbusMaster node;
-Adafruit_BMP280 bme;
+//Adafruit_BMP280 bme;
 WiFiManager wifiManager;
 ModbusReader mbReader;
 ModbusData mbData;
@@ -121,12 +121,12 @@ void setup()
   pinMode(RESET_WIFI_PIN, INPUT_PULLUP);
   pinMode(MANUAL_POST_PIN, INPUT_PULLUP);
 
-  Wire.begin();
+  // Wire.begin();
 
-  if (!bme.begin(0x76)) {
-    Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
-                      "try a different address!"));
-  }
+  // if (!bme.begin(0x76)) {
+  //   Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
+  //                     "try a different address!"));
+  // }
 
   mbReader.initModbus();
 }
@@ -135,30 +135,30 @@ void loop()
 {
   if (millis() - postPrevTime >= mbSetup.postUpdateInterval.toInt())
   {
-    sendPost(mbData);
+    sendPost(mbReader.getData());
     postPrevTime = millis();
   }
   else if (millis() - bmePrevTime >= mbSetup.readingUpdateInterval.toInt())
   {
-    mbData.modbusID               = "modbus1";
-    mbData.pvVoltage              = "32";
-    mbData.pvCurrent              = "8";
-    mbData.pvPower                = "202";
-    mbData.pvTotalChargingToday   = "150";
-    mbData.pvTotalCharging        = "12000";
-    mbData.batVoltage             = "25";
-    mbData.batOverallCurrent      = "0.1";
-    mbData.mpptTemperature        = "25";
-    mbData.batStatus              = "Normal";
-    mbData.batChargingStatus      = "No charging";
-    mbData.batDischargingStatus   = "Load on";
-    mbData.loadVoltage            = "12.9";
-    mbData.loadCurrent            = "0";
-    mbData.loadPower              = "0";
-    mbData.energyConsumedToday    = "0";
-    mbData.energyConsumedTotal    = "0";
-    mbData.espTemperature         = bme.readTemperature();
-    mbData.espPressure            = bme.readPressure();
+    // mbData.modbusID               = "modbus1";
+    // mbData.pvVoltage              = "32";
+    // mbData.pvCurrent              = "8";
+    // mbData.pvPower                = "202";
+    // mbData.pvTotalChargingToday   = "150";
+    // mbData.pvTotalCharging        = "12000";
+    // mbData.batVoltage             = "25";
+    // mbData.batOverallCurrent      = "0.1";
+    // mbData.mpptTemperature        = "25";
+    // mbData.batStatus              = "Normal";
+    // mbData.batChargingStatus      = "No charging";
+    // mbData.batDischargingStatus   = "Load on";
+    // mbData.loadVoltage            = "12.9";
+    // mbData.loadCurrent            = "0";
+    // mbData.loadPower              = "0";
+    // mbData.energyConsumedToday    = "0";
+    // mbData.energyConsumedTotal    = "0";
+    // mbData.espTemperature         = bme.readTemperature();
+    // mbData.espPressure            = bme.readPressure();
 
     mbReader.readModbusDataFromDevice();
 

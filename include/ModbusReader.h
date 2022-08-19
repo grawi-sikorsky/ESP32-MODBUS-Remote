@@ -31,6 +31,8 @@ class ModbusReader{
 
     
     public:
+        ModbusData getData(){ return mbData; }
+
         void initModbus();
         void readModbusDataFromDevice();
         void AddressRegistry_3100();
