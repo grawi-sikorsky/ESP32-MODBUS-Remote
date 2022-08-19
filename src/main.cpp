@@ -104,8 +104,8 @@ void checkManualPostPin(){
 
 void setup()
 {
-//  Serial.begin(115200);
-  Serial.begin(9600);
+  Serial.begin(115200);
+  Serial2.begin(115200);
 
   wifiManager.autoConnect("ESP32-MODBUS");
   pinMode(RESET_WIFI_PIN, INPUT_PULLUP);
@@ -119,7 +119,7 @@ void setup()
   }
 
   // communicate with Modbus slave ID 2 over Serial (port 0)
-  node.begin(1, Serial);
+  node.begin(1, Serial2);
 
 }
 
@@ -192,5 +192,9 @@ void loop()
       Serial.println(data[j]);
     }
     
+  }
+  else
+  {
+    Serial.println("lipa");
   }
 }
