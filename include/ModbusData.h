@@ -7,9 +7,8 @@ class ModbusData{
     String pvVoltage;
     String pvCurrent;
     String pvPower;
-    String pvTotalChargingToday;
-    String pvTotalCharging;
     String pvStatus;
+
     String batVoltage;
     String batDischargeCurrent;
     String batChargingCurrent;
@@ -20,13 +19,13 @@ class ModbusData{
     String batStatus;
     String batChargingStatus;
     String batDischargingStatus;
+    
     String mpptTemperature;
     String loadVoltage;
     String loadCurrent;
     String loadPower;
     String loadStatus;
-    String energyConsumedToday; //
-    String energyConsumedTotal; //
+
     String genTotalToday;
     String genTotalMonth;
     String genTotalYear;
@@ -37,6 +36,4 @@ class ModbusData{
     String consTotalAll;
 
     String test;
-    float espTemperature;
-    float espPressure;
 };

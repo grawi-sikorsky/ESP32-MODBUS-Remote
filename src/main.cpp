@@ -32,26 +32,38 @@ void sendPost(ModbusData data)
   http.begin("https://modbus-back.herokuapp.com/data");
   http.addHeader("Content-Type", "application/json");
 
-  StaticJsonDocument<700> doc;
+  StaticJsonDocument<4000> doc;
   doc["modbusID"]               = data.modbusID;
   doc["pvVoltage"]              = data.pvVoltage;
   doc["pvCurrent"]              = data.pvCurrent;
   doc["pvPower"]                = data.pvPower;
-  doc["pvTotalChargingToday"]   = data.pvTotalChargingToday;
-  doc["pvTotalCharging"]        = data.pvTotalCharging;
+  doc["pvStatus"]               = data.pvStatus;
+
   doc["batVoltage"]             = data.batVoltage;
-  doc["batCurrent"]             = data.batChargingCurrent;
-  doc["mpptTemperature"]        = data.mpptTemperature;
+  doc["batDischargeCurrent"]    = data.batDischargeCurrent;
+  doc["batChargingCurrent"]     = data.batChargingCurrent;
+  doc["batChargingPower"]       = data.batChargingPower;
+  doc["batRemainingPercent"]    = data.batRemainingPercent;
+  doc["batTemperature"]         = data.batTemperature;
+  doc["batOverallCurrent"]      = data.batOverallCurrent;
   doc["batStatus"]              = data.batStatus;
   doc["batChargingStatus"]      = data.batChargingStatus;
   doc["batDischargingStatus"]   = data.batDischargingStatus;
+
   doc["loadVoltage"]            = data.loadVoltage;
   doc["loadCurrent"]            = data.loadCurrent;
   doc["loadPower"]              = data.loadPower;
-  doc["energyConsumedToday"]    = data.energyConsumedToday;
-  doc["energyConsumedTotal"]    = data.energyConsumedTotal;
-  doc["espTemperature"]         = data.espTemperature;
-  doc["espPressure"]            = data.espPressure;
+  doc["loadStatus"]             = data.loadStatus;
+
+  doc["consTotalToday"]         = data.consTotalToday;
+  doc["consTotalMonth"]         = data.consTotalMonth;
+  doc["consTotalYear"]          = data.consTotalYear;
+  doc["consTotalAll"]           = data.consTotalAll;
+  doc["genTotalToday"]          = data.genTotalToday;
+  doc["genTotalMonth"]          = data.genTotalMonth;
+  doc["genTotalYear"]           = data.genTotalYear;
+  doc["genTotalAll"]            = data.genTotalAll;
+  doc["mpptTemperature"]        = data.mpptTemperature;
 
   String requestBody;
   serializeJson(doc, requestBody);
