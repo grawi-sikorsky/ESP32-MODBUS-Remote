@@ -31,7 +31,6 @@ class ModbusReader{
     
     public:
         ModbusData mbData;
-        ModbusData getData(){ return mbData; }
 
         void initModbus();
         void readModbusDataFromDevice();

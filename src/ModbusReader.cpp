@@ -24,7 +24,6 @@ void ModbusReader::AddressRegistry_3100()
 {
     if (node.readInputRegisters(0x3100, 6) == node.ku8MBSuccess)
     {
-
         mbData.pvVoltage = node.getResponseBuffer(0x00) / 100.0f;
         mbData.pvCurrent = node.getResponseBuffer(0x01) / 100.0f;
         mbData.pvPower = (node.getResponseBuffer(0x02) | node.getResponseBuffer(0x03) << 16) / 100.0f;

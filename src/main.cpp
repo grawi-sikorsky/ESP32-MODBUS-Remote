@@ -13,11 +13,11 @@
 #include "SetupData.h"
 
 
-ModbusMaster node;
+// ModbusMaster node;
 //Adafruit_BMP280 bme;
 WiFiManager wifiManager;
 ModbusReader mbReader;
-ModbusData mbData;
+// ModbusData mbData;
 SetupData mbSetup;
 
 time_t postPrevTime, setupPrevTime;
@@ -25,14 +25,13 @@ time_t bmePrevTime;
 
 int i = 1;
 
-
 void sendPost(ModbusData data)
 {
   HTTPClient http;
   http.begin("https://modbus-back.herokuapp.com/data");
   http.addHeader("Content-Type", "application/json");
 
-  StaticJsonDocument<4000> doc;
+  StaticJsonDocument<2048> doc;
   doc["modbusID"]               = data.modbusID;
   doc["pvVoltage"]              = data.pvVoltage;
   doc["pvCurrent"]              = data.pvCurrent;
@@ -108,7 +107,7 @@ void checkResetWifiButton(){
 
 void checkManualPostPin(){
   if(digitalRead(MANUAL_POST_PIN) == LOW){
-    sendPost(mbData);
+    sendPost(mbReader.mbData);
     Serial.println("Manual POST sent..");
   }
 }
@@ -121,14 +120,13 @@ void setup()
   pinMode(RESET_WIFI_PIN, INPUT_PULLUP);
   pinMode(MANUAL_POST_PIN, INPUT_PULLUP);
 
-  // Wire.begin();
-
-  // if (!bme.begin(0x76)) {
-  //   Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
-  //                     "try a different address!"));
-  // }
-
   mbReader.initModbus();
+  getSetup();
+  Serial.print("modbusid przed: ");
+  Serial.println(mbReader.mbData.modbusID);
+  mbReader.mbData.modbusID = "modbus1";
+  Serial.print("modbusid po: ");
+  Serial.println(mbReader.mbData.modbusID);
 }
 
 void loop()
@@ -140,30 +138,11 @@ void loop()
   }
   else if (millis() - bmePrevTime >= mbSetup.readingUpdateInterval.toInt())
   {
-    // mbData.modbusID               = "modbus1";
-    // mbData.pvVoltage              = "32";
-    // mbData.pvCurrent              = "8";
-    // mbData.pvPower                = "202";
-    // mbData.pvTotalChargingToday   = "150";
-    // mbData.pvTotalCharging        = "12000";
-    // mbData.batVoltage             = "25";
-    // mbData.batOverallCurrent      = "0.1";
-    // mbData.mpptTemperature        = "25";
-    // mbData.batStatus              = "Normal";
-    // mbData.batChargingStatus      = "No charging";
-    // mbData.batDischargingStatus   = "Load on";
-    // mbData.loadVoltage            = "12.9";
-    // mbData.loadCurrent            = "0";
-    // mbData.loadPower              = "0";
-    // mbData.energyConsumedToday    = "0";
-    // mbData.energyConsumedTotal    = "0";
-    // mbData.espTemperature         = bme.readTemperature();
-    // mbData.espPressure            = bme.readPressure();
+    //mbReader.mbData.modbusID = "modbus1";
 
     mbReader.readModbusDataFromDevice();
 
     bmePrevTime = millis();
-
   }
   else if(millis() - setupPrevTime >= mbSetup.setupUpdateInterval.toInt())
   {
