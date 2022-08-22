@@ -71,9 +71,14 @@ void sendPost(ModbusData data)
 
   int httpResponseCode = http.POST(requestBody);
 
+  if(httpResponseCode == 200){
+    Serial.println("[] HTTP POST sent.");
+  }
+  else{
+    Serial.println("[] HTTP POST failed.");
+    wifiConnected = false;
+  }
   http.end();
-
-  Serial.println("[] HTTP POST sent.");
 }
 
 void getSetup(){
@@ -92,6 +97,11 @@ void getSetup(){
     mbSetup.postUpdateInterval    = (const char*)doc["postUpdateInterval"];
     mbSetup.setupUpdateInterval   = (const char*)doc["setupUpdateInterval"];
 
+    // na wypadek blednej (np.0) wartosci trzeba ustawic default, inaczej zapetla sie na post lub get
+    if( mbSetup.postUpdateInterval.toInt() < 1000 ) mbSetup.postUpdateInterval = 1000;
+    if( mbSetup.readingUpdateInterval.toInt() < 1000 ) mbSetup.readingUpdateInterval = 1000;
+    if( mbSetup.setupUpdateInterval.toInt() < 1000 ) mbSetup.setupUpdateInterval = 1000;
+
     Serial.print("[] HTTP GET done, response: ");
     Serial.println(httpResponseCode);
     Serial.println(mbSetup.modbusID);
@@ -101,6 +111,7 @@ void getSetup(){
   } else {
     Serial.print("[] HTTP GET fail, response: ");
     Serial.println(httpResponseCode);
+    wifiConnected = false;
   }
 
   http.end();
@@ -126,6 +137,7 @@ void checkManualPostPin(){
 void checkWIFIstatus(){
   if(wifiConnected == false){
     wifiConnected = wifiManager.autoConnect("ESP32-MODBUS");
+    getSetup();
   }
 }
 
@@ -148,20 +160,17 @@ void setup()
 
 void loop()
 {
-  if (millis() - postPrevTime >= mbSetup.postUpdateInterval.toInt())
+  if (millis() - postPrevTime >= mbSetup.postUpdateInterval.toInt() )
   {
     sendPost(mbReader.mbData);
     postPrevTime = millis();
   }
-  else if (millis() - bmePrevTime >= mbSetup.readingUpdateInterval.toInt())
+  else if (millis() - bmePrevTime >= mbSetup.readingUpdateInterval.toInt() )
   {
-    //mbReader.mbData.modbusID = "modbus1";
-
     mbReader.readModbusDataFromDevice();
-
     bmePrevTime = millis();
   }
-  else if(millis() - setupPrevTime >= mbSetup.setupUpdateInterval.toInt())
+  else if(millis() - setupPrevTime >= mbSetup.setupUpdateInterval.toInt() )
   {
     getSetup();
     setupPrevTime = millis();
