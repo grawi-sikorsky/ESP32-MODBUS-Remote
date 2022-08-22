@@ -36,7 +36,7 @@ class ModbusReader{
         void readModbusDataFromDevice();
         void AddressRegistry_3100();
         void AddressRegistry_3106();
-        void AddressRegistry_310D();
+        void AddressRegistry_310C();
         void AddressRegistry_311A();
         void AddressRegistry_331B();
         void AddressRegistry_3200();

@@ -23,6 +23,8 @@ SetupData mbSetup;
 time_t postPrevTime, setupPrevTime;
 time_t bmePrevTime;
 
+bool wifiConnected = false;
+
 int i = 1;
 
 void sendPost(ModbusData data)
@@ -71,7 +73,7 @@ void sendPost(ModbusData data)
 
   http.end();
 
-  Serial.println("POST sent.");
+  Serial.println("[] HTTP POST sent.");
 }
 
 void getSetup(){
@@ -81,18 +83,27 @@ void getSetup(){
 
   int httpResponseCode = http.GET();
 
-  DynamicJsonDocument doc(1024);
-  deserializeJson(doc, http.getString());
+  if(httpResponseCode == 200){
+    DynamicJsonDocument doc(1024);
+    deserializeJson(doc, http.getString());
 
-  mbSetup.modbusID              = (const char*)doc["modbusID"];
-  mbSetup.readingUpdateInterval = (const char*)doc["readingUpdateInterval"];
-  mbSetup.postUpdateInterval    = (const char*)doc["postUpdateInterval"];
-  mbSetup.setupUpdateInterval   = (const char*)doc["setupUpdateInterval"];
+    mbSetup.modbusID              = (const char*)doc["modbusID"];
+    mbSetup.readingUpdateInterval = (const char*)doc["readingUpdateInterval"];
+    mbSetup.postUpdateInterval    = (const char*)doc["postUpdateInterval"];
+    mbSetup.setupUpdateInterval   = (const char*)doc["setupUpdateInterval"];
+
+    Serial.print("[] HTTP GET done, response: ");
+    Serial.println(httpResponseCode);
+    Serial.println(mbSetup.modbusID);
+    Serial.println(mbSetup.readingUpdateInterval);
+    Serial.println(mbSetup.postUpdateInterval);
+    Serial.println(mbSetup.setupUpdateInterval);
+  } else {
+    Serial.print("[] HTTP GET fail, response: ");
+    Serial.println(httpResponseCode);
+  }
 
   http.end();
-
-  Serial.print("GET done with HTTP response: ");
-  Serial.println(httpResponseCode);
 }
 
 void initRemoteSetup(){
@@ -112,21 +123,27 @@ void checkManualPostPin(){
   }
 }
 
+void checkWIFIstatus(){
+  if(wifiConnected == false){
+    wifiConnected = wifiManager.autoConnect("ESP32-MODBUS");
+  }
+}
+
 void setup()
 {
   Serial.begin(115200);
 
-  wifiManager.autoConnect("ESP32-MODBUS");
+  wifiManager.setTimeout(60);
+  wifiManager.setConnectRetries(2);
+
+  wifiConnected = wifiManager.autoConnect("ESP32-MODBUS");
   pinMode(RESET_WIFI_PIN, INPUT_PULLUP);
   pinMode(MANUAL_POST_PIN, INPUT_PULLUP);
 
   mbReader.initModbus();
   getSetup();
-  Serial.print("modbusid przed: ");
-  Serial.println(mbReader.mbData.modbusID);
+
   mbReader.mbData.modbusID = "modbus1";
-  Serial.print("modbusid po: ");
-  Serial.println(mbReader.mbData.modbusID);
 }
 
 void loop()
@@ -153,5 +170,6 @@ void loop()
   {
     checkManualPostPin();
     checkResetWifiButton();
+    checkWIFIstatus();
   }
 }

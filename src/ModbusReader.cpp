@@ -10,7 +10,7 @@ void ModbusReader::readModbusDataFromDevice()
 {
     AddressRegistry_3100();
     AddressRegistry_3106();
-    AddressRegistry_310D();
+    AddressRegistry_310C();
     AddressRegistry_311A();
     AddressRegistry_331B();
     AddressRegistry_3200();
@@ -62,14 +62,18 @@ void ModbusReader::AddressRegistry_3106()
     }
 }
 
-void ModbusReader::AddressRegistry_310D()
+void ModbusReader::AddressRegistry_310C()
 {
-    if (node.readInputRegisters(0x310D, 3) == node.ku8MBSuccess)
+    if (node.readInputRegisters(0x310C, 4) == node.ku8MBSuccess)
     {
-        mbData.loadCurrent = node.getResponseBuffer(0x00) / 100.0f;
-        mbData.loadPower = (node.getResponseBuffer(0x01) | node.getResponseBuffer(0x02) << 16) / 100.0f;
+        mbData.loadVoltage = node.getResponseBuffer(0x00) / 100.0f;
+        mbData.loadCurrent = node.getResponseBuffer(0x01) / 100.0f;
+        mbData.loadPower = (node.getResponseBuffer(0x02) | node.getResponseBuffer(0x03) << 16) / 100.0f;
 
         #ifdef DEBUG
+            Serial.print("Load Voltage: ");
+            Serial.println(mbData.loadVoltage);
+
             Serial.print("Load Current: ");
             Serial.println(mbData.loadCurrent);
 
