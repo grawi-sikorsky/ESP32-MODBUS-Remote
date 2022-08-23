@@ -20,17 +20,23 @@ ModbusReader mbReader;
 // ModbusData mbData;
 SetupData mbSetup;
 
-time_t postPrevTime, setupPrevTime;
+time_t postPrevTime, setupPrevTime, livePrevTime;
 time_t bmePrevTime;
 
 bool wifiConnected = false;
 
 int i = 1;
 
-void sendPost(ModbusData data)
+void sendPost(bool liveData, ModbusData data)
 {
   HTTPClient http;
-  http.begin("https://modbus-back.herokuapp.com/data");
+  if(liveData){
+    http.begin("https://modbus-back.herokuapp.com/live");  
+  }
+  else{
+    http.begin("https://modbus-back.herokuapp.com/data");
+  }
+  
   http.addHeader("Content-Type", "application/json");
 
   StaticJsonDocument<2048> doc;
@@ -71,10 +77,11 @@ void sendPost(ModbusData data)
 
   int httpResponseCode = http.POST(requestBody);
 
-  if(httpResponseCode == 200){
-    Serial.println("[] HTTP POST sent.");
-  }
-  else{
+  if(httpResponseCode == 200 && liveData){
+    Serial.println("[] HTTP POST LIVE DATA sent.");
+  } else if (httpResponseCode == 200 && !liveData){
+    Serial.println("[] HTTP POST SAVE DATA sent.");
+  } else {
     Serial.println("[] HTTP POST failed.");
     wifiConnected = false;
   }
@@ -89,7 +96,7 @@ void getSetup(){
   int httpResponseCode = http.GET();
 
   if(httpResponseCode == 200){
-    DynamicJsonDocument doc(1024);
+    DynamicJsonDocument doc(512);
     deserializeJson(doc, http.getString());
 
     mbSetup.modbusID              = (const char*)doc["modbusID"];
@@ -104,16 +111,11 @@ void getSetup(){
 
     Serial.print("[] HTTP GET done, response: ");
     Serial.println(httpResponseCode);
-    Serial.println(mbSetup.modbusID);
-    Serial.println(mbSetup.readingUpdateInterval);
-    Serial.println(mbSetup.postUpdateInterval);
-    Serial.println(mbSetup.setupUpdateInterval);
   } else {
     Serial.print("[] HTTP GET fail, response: ");
     Serial.println(httpResponseCode);
     wifiConnected = false;
   }
-
   http.end();
 }
 
@@ -129,7 +131,7 @@ void checkResetWifiButton(){
 
 void checkManualPostPin(){
   if(digitalRead(MANUAL_POST_PIN) == LOW){
-    sendPost(mbReader.mbData);
+    sendPost(true, mbReader.mbData);
     Serial.println("Manual POST sent..");
   }
 }
@@ -162,12 +164,18 @@ void loop()
 {
   if (millis() - postPrevTime >= mbSetup.postUpdateInterval.toInt() )
   {
-    sendPost(mbReader.mbData);
+    sendPost(false, mbReader.mbData);
     postPrevTime = millis();
   }
+  // else if (millis() - livePrevTime >= 1000)
+  // {
+  //   sendPost(true, mbReader.mbData);
+  //   livePrevTime = millis();
+  // }
   else if (millis() - bmePrevTime >= mbSetup.readingUpdateInterval.toInt() )
   {
     mbReader.readModbusDataFromDevice();
+    sendPost(true, mbReader.mbData);
     bmePrevTime = millis();
   }
   else if(millis() - setupPrevTime >= mbSetup.setupUpdateInterval.toInt() )

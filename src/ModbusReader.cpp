@@ -18,6 +18,9 @@ void ModbusReader::readModbusDataFromDevice()
     AddressDeviceTemp();
     AddressGeneratedTotals();
     AddressConsumedTotals();
+    #ifndef DEBUG
+        Serial.println("Modbus Reading Done.");
+    #endif
 }
 
 void ModbusReader::AddressRegistry_3100()
