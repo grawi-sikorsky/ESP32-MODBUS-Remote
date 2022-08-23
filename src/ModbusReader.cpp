@@ -88,14 +88,14 @@ void ModbusReader::AddressRegistry_311A()
     if (node.readInputRegisters(0x311A, 2) == node.ku8MBSuccess)
     {
         mbData.batRemainingPercent = node.getResponseBuffer(0x00) / 1.0f;
-        mbData.batRemainingPercent = node.getResponseBuffer(0x01) / 100.0f;
+        mbData.batTemperature = node.getResponseBuffer(0x01) / 100.0f;
 
         #ifdef DEBUG
             Serial.print("Battery Remaining %: ");
             Serial.println(mbData.batRemainingPercent);
 
             Serial.print("Battery Temperature: ");
-            Serial.println(mbData.batRemainingPercent);
+            Serial.println(mbData.batTemperature);
         #endif
     }
 }
