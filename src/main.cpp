@@ -2,23 +2,22 @@
 #include "WiFiManager.h"
 #include "HTTPClient.h"
 #include <ArduinoJson.h>
-// #include <Adafruit_Sensor.h>
-// #include <Adafruit_BMP280.h>
 #include <Wire.h>
 #include <ModbusMaster.h>
+#include <TimerEvent.h>
 
 // MOJE INCLUDES
-// #include "ModbusData.h"
 #include "ModbusReader.h"
 #include "SetupData.h"
 
 
-// ModbusMaster node;
-//Adafruit_BMP280 bme;
 WiFiManager wifiManager;
 ModbusReader mbReader;
-// ModbusData mbData;
 SetupData mbSetup;
+
+TimerEvent modbusUpdate;
+TimerEvent postTimer;
+TimerEvent getTimer;
 
 time_t postPrevTime, setupPrevTime, livePrevTime;
 time_t bmePrevTime;
@@ -149,8 +148,8 @@ void setup()
 
   wifiManager.setTimeout(60);
   wifiManager.setConnectRetries(2);
-
   wifiConnected = wifiManager.autoConnect("ESP32-MODBUS");
+
   pinMode(RESET_WIFI_PIN, INPUT_PULLUP);
   pinMode(MANUAL_POST_PIN, INPUT_PULLUP);
 
@@ -158,8 +157,14 @@ void setup()
   getSetup();
 
   mbReader.mbData.modbusID = "modbus1";
+
+  // Set the interval timing as well as pass the function name
+  // modbusUpdate.set(500, timerOneFunc);
+  // postTimer.set(500, timerTwoFunc);s
+  // getTimer.set(500, getSetup);
 }
 
+// LOOP
 void loop()
 {
   if (millis() - postPrevTime >= mbSetup.postUpdateInterval.toInt() )
