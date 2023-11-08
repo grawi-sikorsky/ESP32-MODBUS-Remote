@@ -113,10 +113,10 @@ void setup()
 
   Wire.begin();
 
-  if (!bme.begin(0x76)) {
-  Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
-                    "try a different address!"));
-  }
+  // if (!bme.begin(0x76)) {
+  // Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
+  //                   "try a different address!"));
+  // }
 
   // communicate with Modbus slave ID 2 over Serial (port 0)
   node.begin(1, Serial2);
