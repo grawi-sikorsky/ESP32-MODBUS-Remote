@@ -18,7 +18,7 @@ Adafruit_BMP280 bme;
 #define MANUAL_POST_PIN 13
 #define MANUAL_PIN 12
 
-#define POST_INTERVAL 120000
+#define POST_INTERVAL 15000
 #define BME_INTERVAL 5000
 #define I2C_SDA 21
 #define I2C_SCL 22
@@ -57,7 +57,8 @@ modbusData mbData;
 void sendPost(modbusData data)
 {
   HTTPClient http;
-  http.begin("https://modbus-back.herokuapp.com/data");
+  // http.begin("https://modbus-back.herokuapp.com/data");
+  http.begin("http://192.168.0.151/data");
   http.addHeader("Content-Type", "application/json");
 
   StaticJsonDocument<700> doc;
@@ -85,7 +86,7 @@ void sendPost(modbusData data)
   serializeJson(doc, requestBody);
 
   int httpResponseCode = http.POST(requestBody);
-
+  Serial.println(httpResponseCode);
   http.end();
 }
 
@@ -100,6 +101,21 @@ void checkManualPostPin(){
     sendPost(mbData);
     Serial.println("manual POST sent..");
   }
+}
+
+void printMac(){
+  // Get the MAC address
+  uint8_t mac[6];
+  WiFi.macAddress(mac);
+
+  Serial.print("MAC Address: ");
+  for (int i = 0; i < 6; i++) {
+    Serial.printf("%02X", mac[i]);
+    if (i < 5) {
+      Serial.print(":");
+    }
+  }
+  Serial.println();
 }
 
 void setup()
@@ -120,7 +136,7 @@ void setup()
 
   // communicate with Modbus slave ID 2 over Serial (port 0)
   node.begin(1, Serial2);
-
+  printMac();
 }
 
 void loop()
@@ -153,8 +169,10 @@ void loop()
     mbData.loadPower              = "0";
     mbData.energyConsumedToday    = "0";
     mbData.energyConsumedTotal    = "0";
-    mbData.espTemperature         = bme.readTemperature();
-    mbData.espPressure            = bme.readPressure();
+    // mbData.espTemperature         = bme.readTemperature();
+    // mbData.espPressure            = bme.readPressure();
+    mbData.espTemperature         = 0.00;
+    mbData.espPressure            = 0.00;
 
     bmePrevTime = millis();
   }
